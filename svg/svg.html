@@ -1,0 +1,208 @@
+<html>
+    <head>
+        <script
+        src="https://code.jquery.com/jquery-1.12.4.min.js"
+        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous"></script>
+
+        <style>
+            svg {
+                /*border: 1px solid black;*/
+            }
+
+            line {
+                stroke:rgb(255,0,0);
+                stroke-width:0.001pt;
+            }
+        </style>
+    </head>
+
+
+    <body>
+        <!--<svg height="210" width="500" style="border: 1px solid black">
+            <line x1="0" y1="0" x2="200" y2="55mm" style="stroke:rgb(255,0,0);stroke-width:2" />
+        </svg>-->
+
+        <div id="heh"></div>
+    </body>
+
+    <script>
+        // units in mm
+        // deflection = vertical deflection desired
+        // distance = distance from prism to screen
+        // height = desired height of prism
+        // x,y = virtual coordinates of prism on svg canvas
+        // buffer = horizontal padding on prism
+        // n = index of refraction of acrylic
+        function makePrism(deflection, distance, height, /*x, y,*/ buffer, n) {
+            //var a = [x, y];
+            //var b = [x, y + height];
+            var delta = Math.atan(deflection / distance);
+            var width = height * Math.sin(delta) / (n - Math.cos(delta));
+            //var c = [x + width, y];
+            
+            console.log("DEFLECTING " + deflection + " OVER " + distance + ": " + delta * Math.PI / 180);
+
+            //return [a, b, c];
+            return Math.abs(width);
+        }
+        
+        // desired width of the prisms (ie 0.5", 1", 1.5")
+        // desired height of the prisms (mm)
+        // acrylicThickness (duh) (inches)
+        // numPerRow: number of prisms we want in a row on the monitor
+        // numPerCol: number of prisms we want in a col on the monitor
+        // spacing: desired spacing between prisms (mm)
+        // distanceToScreen: (duh) (mm)
+        // canvasWidth: virtaul width of the svg (mm)
+        // canvasHeight: virtual height of the svg (mm)
+        // buffer = horizontal padding on each prism (mm)
+        // index of refraction (1.5 for acrylic)
+        function generatePrisms(width, height, acrylicThickness, numPerRow, numPerCol, spacing, distanceToScreen, canvasWidth, canvasHeight, buffer, n) {
+            var canvasBuffer = 5;
+            var cursorX = canvasBuffer;
+            var cursorY = canvasBuffer;
+            
+            var prismX = 0;
+            var prismY = 0;
+            
+            var multX = Math.floor(width / acrylicThickness);
+            var multY = Math.floor(height / acrylicThickness);
+            var actualWidth = multX * acrylicThickness * 25.4;
+            var actualHeight = multY * acrylicThickness * 25.4;
+            
+            var rigWidth = (actualWidth * numPerCol) + (spacing * (numPerCol - 1));
+            var rigHeight = (actualHeight * numPerRow) + (spacing * (numPerRow - 1));
+            var rigCenter = [rigWidth / 2, rigHeight / 2];
+
+            console.log("RIG WIDTH/HEIGHT: " + rigWidth + ", " + rigHeight);
+
+            var prisms = [];
+
+            for(var i = 0; i < numPerRow; i++) {
+                for(var j = 0; j < numPerCol; j++) {
+                    var prismCenter = [prismX + (actualWidth / 2), prismY + (actualHeight / 2)];
+                    var deflectionX = rigCenter[0] - prismCenter[0];
+                    var deflectionY = rigCenter[1] - prismCenter[1];
+                    
+                    // make the horizontal deflection pieces
+                    var pieceWidth = actualWidth;
+                    var pieceHeight = makePrism(deflectionX, distanceToScreen, pieceWidth, buffer, n);
+                    
+                    if(cursorX + pieceWidth + buffer + canvasBuffer > canvasWidth) {
+                        cursorX = canvasBuffer;
+                        cursorY += actualHeight + canvasBuffer + 7;
+                    }
+
+                    var k = 0;
+                    var yStart = cursorY;
+                    while(true) {
+                        if(k < multY) {
+                            let a = [cursorX, yStart];
+                            let b = [cursorX + pieceWidth, yStart];
+                            let c = [cursorX + pieceWidth, yStart + buffer];
+                            let d = [cursorX, yStart + pieceHeight + buffer,];
+
+                            prisms.push([a, b, c, d]);
+                            k++;
+                        }
+                        else {
+                            break;
+                        }
+                        
+                        yStart += pieceHeight + buffer + canvasBuffer;
+                        if(k < multY) {
+                            let a = [cursorX, yStart];
+                            let b = [cursorX + pieceWidth, yStart - pieceHeight];
+                            let c = [cursorX + pieceWidth, yStart + buffer];
+                            let d = [cursorX, yStart + buffer];
+
+                            prisms.push([a, b, c, d]);
+                            k++;
+                        }
+                        else {
+                            break;
+                        }
+
+                        yStart += canvasBuffer + buffer;
+                    }
+                    cursorX += pieceWidth + canvasBuffer;
+
+                    // make the vertical pieces
+                    var pieceHeight = actualHeight;
+                    pieceWidth = makePrism(deflectionY, distanceToScreen, pieceHeight, canvasBuffer, n);
+
+                    if(cursorX + ((pieceWidth + buffer) *  multX) + (canvasBuffer * (multX - 1)) > canvasWidth) {
+                        cursorX = buffer;
+                        cursorY += actualHeight + canvasBuffer + 7;
+                    }
+
+                    var k = 0;
+                    var xStart = cursorX;
+                    while(true) {
+                        if(k < multX) {
+                            let a = [xStart, cursorY];
+                            let b = [xStart + pieceWidth + buffer, cursorY];
+                            let c = [xStart + buffer, cursorY + pieceHeight];
+                            let d = [xStart, cursorY + pieceHeight];
+
+                            prisms.push([a, b, c, d]);
+                            k++;
+                        }
+                        else {
+                            break;
+                        }
+
+                        xStart += pieceWidth + buffer + canvasBuffer;
+                        if(k < multX) {
+                            let a = [xStart, cursorY];
+                            let b = [xStart + buffer, cursorY];
+                            let c = [xStart + buffer, cursorY + pieceHeight];
+                            let d = [xStart - pieceWidth, cursorY + pieceHeight];
+                            
+                            prisms.push([a, b, c, d]);
+                            k++;
+                        }
+                        else {
+                            break;
+                        }
+                        xStart += buffer + canvasBuffer;
+                    }
+
+                    cursorX += ((pieceWidth + buffer) * multX) + (canvasBuffer * multX);
+                    prismY += actualHeight + spacing;
+                }
+                prismY = 0;
+                prismX += actualWidth + spacing;
+            }
+
+            return prisms;
+        }
+
+        function drawPrisms(prisms, canvasWidth, canvasHeight) {
+            let sf = 3.779527559;
+            let svg = "<svg height='" + (canvasHeight * sf) +  "' width='" + (canvasWidth * sf) + "' class='acrylic'>";
+            
+            for(var i = 0; i < prisms.length; i++) {
+                let a = prisms[i][0];
+                let b = prisms[i][1];
+                let c = prisms[i][2];
+                let d = prisms[i][3];
+
+                svg += "<line x1='" + a[0] + "mm' x2='" + b[0] + "mm' y1='" + a[1] + "mm' y2='" + b[1] + "mm' />";
+                svg += "<line x1='" + b[0] + "mm' x2='" + c[0] + "mm' y1='" + b[1] + "mm' y2='" + c[1] + "mm' />";
+                svg += "<line x1='" + c[0] + "mm' x2='" + d[0] + "mm' y1='" + c[1] + "mm' y2='" + d[1] + "mm' />";
+                svg += "<line x1='" + d[0] + "mm' x2='" + a[0] + "mm' y1='" + d[1] + "mm' y2='" + a[1] + "mm' />";
+            }
+
+            svg += "</svg>";
+
+            return svg;
+        }
+
+        let myPrisms = generatePrisms(1.5, 1.5, 0.5, 4, 5, 5, 640, 330, 330, 5, 1.5);
+        let svgStr = drawPrisms(myPrisms, 330, 330);
+
+        $("#heh").append(svgStr);
+    </script>
+</html>

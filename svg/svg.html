@@ -41,10 +41,16 @@
             var width = height * Math.sin(delta) / (n - Math.cos(delta));
             //var c = [x + width, y];
             
-            console.log("DEFLECTING " + deflection + " OVER " + distance + ": " + delta * Math.PI / 180);
+            //console.log("DEFLECTING " + deflection + " OVER " + distance + ": " + delta * Math.PI / 180);
 
             //return [a, b, c];
             return Math.abs(width);
+        }
+
+        function printAngle(deflection, distance, height, /*x, y,*/ buffer, n) {
+            var delta = Math.atan(deflection / distance);
+            var x = Math.sin(delta) / (n - Math.cos(delta));
+            console.log("DELTA: " + (delta * 180 / Math.PI) + " x: " + (x * 180 / Math.PI));
         }
         
         // desired width of the prisms (ie 0.5", 1", 1.5")
@@ -59,7 +65,7 @@
         // buffer = horizontal padding on each prism (mm)
         // index of refraction (1.5 for acrylic)
         function generatePrisms(width, height, acrylicThickness, numPerRow, numPerCol, spacing, distanceToScreen, canvasWidth, canvasHeight, buffer, n) {
-            var canvasBuffer = 5;
+            var canvasBuffer = 3;
             var cursorX = canvasBuffer;
             var cursorY = canvasBuffer;
             
@@ -70,13 +76,18 @@
             var multY = Math.floor(height / acrylicThickness);
             var actualWidth = multX * acrylicThickness * 25.4;
             var actualHeight = multY * acrylicThickness * 25.4;
+
+
+            console.log("AW: " + actualWidth + "AH " + actualHeight);
             
-            var rigWidth = (actualWidth * numPerCol) + (spacing * (numPerCol - 1));
-            var rigHeight = (actualHeight * numPerRow) + (spacing * (numPerRow - 1));
+            var rigWidth = (actualWidth * numPerRow) + (spacing * (numPerRow - 1));
+            var rigHeight = (actualHeight * numPerCol) + (spacing * (numPerCol - 1));
             var rigCenter = [rigWidth / 2, rigHeight / 2];
 
             console.log("RIG WIDTH/HEIGHT: " + rigWidth + ", " + rigHeight);
+            console.log("RIG CENTER: " + rigCenter[0] + ", " + rigCenter[1]);
 
+            var yay = 0;
             var prisms = [];
 
             for(var i = 0; i < numPerRow; i++) {
@@ -84,14 +95,15 @@
                     var prismCenter = [prismX + (actualWidth / 2), prismY + (actualHeight / 2)];
                     var deflectionX = rigCenter[0] - prismCenter[0];
                     var deflectionY = rigCenter[1] - prismCenter[1];
-                    
+                    console.log("THE CENTER OF THIS PRISM IS: " + prismCenter + " (" + deflectionX + ", " + deflectionY + ")");
+
                     // make the horizontal deflection pieces
                     var pieceWidth = actualWidth;
                     var pieceHeight = makePrism(deflectionX, distanceToScreen, pieceWidth, buffer, n);
                     
                     if(cursorX + pieceWidth + buffer + canvasBuffer > canvasWidth) {
                         cursorX = canvasBuffer;
-                        cursorY += actualHeight + canvasBuffer + 7;
+                        cursorY += actualHeight + canvasBuffer + 2;
                     }
 
                     var k = 0;
@@ -127,6 +139,12 @@
                         yStart += canvasBuffer + buffer;
                     }
                     cursorX += pieceWidth + canvasBuffer;
+                    
+                    console.log(++yay);
+                    console.log("x: " + deflectionX + ", y: " + deflectionY)
+                    printAngle(deflectionX, distanceToScreen, pieceWidth, buffer, n);
+                    printAngle(deflectionY, distanceToScreen, pieceHeight, buffer, n);
+                    console.log("\n");
 
                     // make the vertical pieces
                     var pieceHeight = actualHeight;
@@ -181,7 +199,7 @@
 
         function drawPrisms(prisms, canvasWidth, canvasHeight) {
             let sf = 3.779527559;
-            let svg = "<svg height='" + (canvasHeight * sf) +  "' width='" + (canvasWidth * sf) + "' class='acrylic'>";
+            let svg = "<svg height='" + (canvasHeight * sf) +  "' width='" + (canvasWidth * sf) + "' class='acrylicthing2'>";
             
             for(var i = 0; i < prisms.length; i++) {
                 let a = prisms[i][0];
@@ -200,7 +218,7 @@
             return svg;
         }
 
-        let myPrisms = generatePrisms(1.5, 1.5, 0.5, 4, 5, 5, 640, 330, 330, 5, 1.5);
+        let myPrisms = generatePrisms(1.5, 1.5, 0.5, 5, 4, 5, 640, 300, 205, 4, 1.5);
         let svgStr = drawPrisms(myPrisms, 330, 330);
 
         $("#heh").append(svgStr);

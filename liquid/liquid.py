@@ -218,6 +218,31 @@ def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
     bm.faces.new((ddp, dcp, d2cp, d2dp))
     bm.faces.new((ddp, dap, d2ap, d2dp))
     
+    make_svg([(0, 0), (1, 1)], 100)
+    
+def make_svg(point_list, sf):
+    svg_str = "<svg width='100' height='100'>"
+    
+    line_list = ""
+    
+    max_x = 0
+    max_y = 0
+    
+    for x,y in point_list:
+        line_list += str(x * sf) + "," + str(y * sf) + ","
+        max_x = max(max_x, x)
+        max_y = max(max_y, y)
+    
+    c_width = max_x * 1.5 * sf
+    c_height = max_y * 1.5 * sf
+    svg_str = "<svg width='%f' height='%f' xmlns='http://www.w3.org/2000/svg'>" % (c_width, c_height)
+    
+    svg_str += "\n\t<polyline points='%s' stroke='red' stroke-width='1'></polyline>" % (line_list)
+    
+    svg_str += "\n</svg>"   
+    
+    print(svg_str)          
+
 def main():
     obj = bpy.context.object
     me = obj.data

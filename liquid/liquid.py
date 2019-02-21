@@ -218,7 +218,19 @@ def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
     bm.faces.new((ddp, dcp, d2cp, d2dp))
     bm.faces.new((ddp, dap, d2ap, d2dp))
     
-    make_svg([(0, 0), (1, 1)], 100)
+    #bottom
+    make_svg([(a.co.x, a.co.y), (b.co.x, b.co.y), (c.co.x, c.co.y), (d.co.x, d.co.y)], 100)
+    
+    # top
+    make_svg([(a2.co.x, a2.co.y), (b2.co.x, b2.co.y), (c2.co.x, c2.co.y), (d2.co.x, d2.co.y)], 100)
+    
+    # left
+    make_svg([(a.co.y, a.co.z), (a2.co.y, a2.co.z), (d2.co.y, d2.co.z), (d.co.y, d.co.z)], 100)
+    
+    # right
+     make_svg([(a.co.y, a.co.z), (a2.co.y, a2.co.z), (d2.co.y, d2.co.z), (d.co.y, d.co.z)], 100)
+     
+     
     
 def make_svg(point_list, sf):
     svg_str = "<svg width='100' height='100'>"
@@ -236,10 +248,8 @@ def make_svg(point_list, sf):
     c_width = max_x * 1.5 * sf
     c_height = max_y * 1.5 * sf
     svg_str = "<svg width='%f' height='%f' xmlns='http://www.w3.org/2000/svg'>" % (c_width, c_height)
-    
-    svg_str += "\n\t<polyline points='%s' stroke='red' stroke-width='1'></polyline>" % (line_list)
-    
-    svg_str += "\n</svg>"   
+    svg_str += "\n\t<polyline points='%s' stroke='red' stroke-width='1' fill='none'></polyline>" % (line_list)
+    svg_str += "\n</svg>\n"
     
     print(svg_str)          
 

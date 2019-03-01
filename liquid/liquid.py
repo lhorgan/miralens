@@ -1,6 +1,14 @@
 import bpy, bmesh, math
 
-def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
+translated = {}
+
+def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm, start=(0,0,0)):
+    flip_x = angle_x < 0
+    flip_y = angle_y < 0
+    
+    angle_x = abs(angle_x)
+    angle_y = abs(angle_y)
+    
     rad_angle_x = angle_x * (math.pi / 180)
     rad_angle_y = angle_y * (math.pi / 180)
     
@@ -10,7 +18,9 @@ def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
     sub_tri_x_height = thickness * math.tan(rad_angle_x)
     sub_tri_y_width = thickness * math.tan(rad_angle_y)
     
-    print("%f, %f" % (tri_x_height, tri_y_width))
+    #print("%f, %f" % (tri_x_height, tri_y_width))
+    
+    #z = (0, 0, 0)
     
     # bottom face
     a = bm.verts.new((0, 0, 0))
@@ -107,6 +117,18 @@ def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
     d2cp = bm.verts.new((d2c.co.x, d2c.co.y + sub_tri_y_width, d2a.co.z - thickness)) 
     d2dp = bm.verts.new((d2d.co.x, d2d.co.y + sub_tri_y_width, d2a.co.z - thickness))
     
+    for vert in bm.verts:
+        if vert not in translated:
+            if flip_x:
+                vert.co.x = width - vert.co.x
+            if flip_y:
+                vert.co.z = height - vert.co.z
+            
+            vert.co.x += start[0]
+            vert.co.y += start[1]
+            vert.co.z += start[2]
+            translated[vert] = ""
+        
     ''' bottom '''
     # front bottom left corner
     bm.faces.new((a, ab, ac, ad))
@@ -208,12 +230,14 @@ def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
     bm.faces.new((bdp, bcp, b2cp, b2dp))
     bm.faces.new((bdp, bap, b2ap, b2dp))
     
-    bm.faces.new((ccp, cbp, c2bp, c2ap))
+    # back right
+    bm.faces.new((cap, cbp, c2bp, c2ap))
     bm.faces.new((cbp, ccp, c2cp, c2bp))
     bm.faces.new((cdp, ccp, c2cp, c2dp))
     bm.faces.new((cdp, cap, c2ap, c2dp))
     
-    bm.faces.new((ddp, dbp, d2bp, d2ap))
+    # back left
+    bm.faces.new((dap, dbp, d2bp, d2ap))
     bm.faces.new((dbp, dcp, d2cp, d2bp))
     bm.faces.new((ddp, dcp, d2cp, d2dp))
     bm.faces.new((ddp, dap, d2ap, d2dp))
@@ -228,12 +252,18 @@ def make_prism_frame(angle_x, angle_y, width, height, thickness, spacing, bm):
     make_svg([(a.co.y, a.co.z), (a2.co.y, a2.co.z), (d2.co.y, d2.co.z), (d.co.y, d.co.z)], 100)
     
     # right
-     make_svg([(a.co.y, a.co.z), (a2.co.y, a2.co.z), (d2.co.y, d2.co.z), (d.co.y, d.co.z)], 100)
-     
-     
+    make_svg([(a.co.y, a.co.z), (a2.co.y, a2.co.z), (d2.co.y, d2.co.z), (d.co.y, d.co.z)], 100)
+    
+    # front
+    front_width = math.sqrt(width**2 + sub_tri_x_height**2)
+    make_svg([(0, 0), (0, height), (front_width, height), (front_width, 0)], 100) 
+    
+    # back
+    back_height = math.sqrt(height**2 + sub_tri_y_width**2)
+    make_svg([(0, 0), (0, back_height), (width, back_height), (width, 0)], 100)
     
 def make_svg(point_list, sf):
-    svg_str = "<svg width='100' height='100'>"
+    #svg_str = "<svg width='100' height='100'>"
     
     line_list = ""
     
@@ -247,22 +277,66 @@ def make_svg(point_list, sf):
     
     c_width = max_x * 1.5 * sf
     c_height = max_y * 1.5 * sf
+    
+    7
+    
     svg_str = "<svg width='%f' height='%f' xmlns='http://www.w3.org/2000/svg'>" % (c_width, c_height)
     svg_str += "\n\t<polyline points='%s' stroke='red' stroke-width='1' fill='none'></polyline>" % (line_list)
     svg_str += "\n</svg>\n"
     
-    print(svg_str)          
+    #print(svg_str)          
 
+
+def make_prism_helper(defl_x, defl_y, distance, width, height, spacing, padding, bm, start):
+    deltaX = math.tan(defl_x / distance)
+    deltaY = math.tan(defl_y / distance)
+    
+    print("dx: %f, dy: %f" % (deltaX, deltaY))
+    
+    thetaX = math.atan(math.sin(deltaX) / (1.5 - math.cos(deltaX))) * (180 / math.pi)
+    thetaY = math.atan(math.sin(deltaY) / (1.5 - math.cos(deltaY))) * (180 / math.pi)
+    print("tx: %f, ty: %f" % (thetaX, thetaY))
+    
+    make_prism_frame(thetaX, thetaY, width, height, spacing, padding, bm, start)
+
+def get_defl(pris_per_row, pris_per_col, spacing, width, height, row, col):
+    rig_width = pris_per_row * width + spacing * (pris_per_row - 1)
+    rig_height = pris_per_col * height + spacing * (pris_per_col - 1)
+    rig_center_x = rig_width / 2
+    rig_center_y = rig_height / 2
+    
+    #print("(%f, %f)" % (rig_width, rig_height))
+    
+    prism_center_x = (col * width) + (col * spacing) + (width / 2)
+    prism_center_y = (row * height) + (row * spacing) + (height / 2)
+    
+    return ((prism_center_x - rig_center_x), (prism_center_y - rig_center_y))
+    
+def mps(row, col, bm):
+    defl_x, defl_y = get_defl(5, 4, 0., 1.6534, 1.6534, row, col)
+    defl_x *= 2.54
+    defl_y *= 2.54
+    make_prism_helper(defl_x, defl_y, 64, 1.6534, 1.6534, 0.0625, 0.2, bm, (0, 0, 0))
+    
 def main():
     obj = bpy.context.object
     me = obj.data
     bm = bmesh.from_edit_mesh(me)
-
-    make_prism_frame(30, 30, 1.5, 1.5, 0.0625, 0.25, bm)
-
+    
+    start_x = 0
+    start_y = 0
+    start_z = 0
+    for col in range(5):
+        start_z = 0
+        for row in range(4):
+            defl_x, defl_y = get_defl(5, 4, 0.125, 1.6534, 1.6534, row, col)
+            defl_x *= 2.54
+            defl_y *= 2.54
+            make_prism_helper(defl_x, defl_y, 64, 1.52854, 1.52854, 0.0625, 0.2, bm, (start_x+0.0625, start_y, start_z+0.0625))
+            start_z += 1.6534 + 0.125
+        start_x += 1.6534 + 0.125
+            
+    #mps(0, 0, bm)
     bmesh.update_edit_mesh(obj.data)
-
-    # This is optional, you could also stay in editmode.
-    #bpy.ops.object.mode_set(mode='OBJECT')
     
 main()

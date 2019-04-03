@@ -8,6 +8,7 @@ class ImageSprite(pyglet.sprite.Sprite):
         pyglet.sprite.Sprite.__init__(self, img, x = 300, y = 300)
         self.b = pyglet.image.load("black.png")
         self.w = pyglet.image.load("white.png")
+	
     def black(self):
         self.image = self.b
         return self

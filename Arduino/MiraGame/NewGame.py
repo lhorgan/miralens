@@ -2,16 +2,18 @@ import pyglet
 from pyglet import clock
 i = 0
 fps_display = clock.ClockDisplay()
+
 class ImageSprite(pyglet.sprite.Sprite):
     def __init__(self, batch, img):
         pyglet.sprite.Sprite.__init__(self, img, x = 300, y = 300)
-
+        self.b = pyglet.image.load("black.png")
+        self.w = pyglet.image.load("white.png")
     def black(self):
-        self.image = pyglet.image.load("black.png")
+        self.image = self.b
         return self
 
     def white(self):
-        self.image = pyglet.image.load('white.png')    
+        self.image = self.w    
         return self
 
 class Game(pyglet.window.Window):

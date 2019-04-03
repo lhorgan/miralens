@@ -31,13 +31,10 @@ class Game(pyglet.window.Window):
 
     def on_key_press(self, symbol, modifiers):
         self.keys_held.append(symbol)
-       # if symbol == pyglet.window.key.RIGHT:
-       #     self.player = self.player.move()
 #            print "The 'RIGHT' key was pressed"
 
     def on_key_release(self, symbol, modifiers):
         self.keys_held.pop(self.keys_held.index(symbol))
-       # self.player = self.player.stand()
  #       print "The 'RIGHT' key was released"
 
     def update(self, interval):

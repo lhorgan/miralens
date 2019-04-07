@@ -1,8 +1,9 @@
 from PIL import Image
+import os
 
-def create_outline(in_name, out_name):
+def create_outline(input_dir, in_name, out_name):
     # PIL accesses images in Cartesian co-ordinates, so it is Image[columns, rows]
-    img = Image.open("/home/luke/Documents/prisvg/miralens/tourus_slices/0001.png") 
+    img = Image.open("%s/%s" % (input_dir, in_name))
     pixels = img.load() # create the pixel map
 
     new_img = Image.new('RGB', img.size, 'white')
@@ -22,9 +23,11 @@ def create_outline(in_name, out_name):
                     for m in range(j-3, j+3):
                         new_img_pixels[l,m] = pixels[l,m]
     
-    new_img.save(out_name, out_name)
+    new_img.save(out_name)
 
 def main():
-    input_dir = "~/Documents/prisvg/miralens/donut_small"
-    for filename in asdfk:
-        create_outline(filename, "~/Documents/prisvg/round1/%s" % filename)
+    input_dir = "/home/luke/Documents/prisvg/miralens/donut_small"
+    for filename in os.listdir(input_dir):
+        create_outline(input_dir, filename, "/home/luke/Documents/prisvg/miralens/round1/%s" % filename)
+
+main()

@@ -6,6 +6,68 @@ fps = 240
 black = pyglet.image.load("black.png")
 white = pyglet.image.load("white.png")
 
+import sys
+import os
+from PIL import Image
+import random
+
+
+# luke's code
+def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name):
+    total_width = (box_width * cols) + ((cols - 1) * spacing)
+    # extra row for dv sync
+    total_height = (box_height * (rows+1)) + (rows * spacing)
+    canvas = Image.new('RGB', (total_width, total_height))
+
+    x_offset = 0
+    y_offset = 0
+    images_placed_in_row = 0
+    for filename in filenames:
+        # print("pasting %s" % filename)
+        img = Image.open(filename)
+        img = img.resize((box_width, box_height), Image.ANTIALIAS)
+        tup = (x_offset, y_offset)
+        # print(tup)
+        canvas.paste(img, tup)
+        images_placed_in_row += 1
+
+        x_offset += box_width + spacing
+        if images_placed_in_row == cols:
+            images_placed_in_row = 0
+            y_offset += (box_height + spacing)
+            x_offset = 0
+
+    # add white box for dv sync
+    img = Image.open("white.png")
+    img = img.resize((box_width, box_height), Image.ANTIALIAS)
+    tup = (4*(box_width+spacing), 4*(box_height+spacing))
+    canvas.paste(img, tup)
+    canvas.save("%s.png" % image_name)
+
+
+def parse_directory(rows, cols, directory):
+    image_lists = [[]]
+
+    for filename in os.listdir(directory):
+        image_lists[-1].append(directory + "\\" + filename)
+        if len(image_lists[-1]) == rows * cols:
+            image_lists.append([])
+
+    image_lists = image_lists[:-1]
+
+    return image_lists
+
+
+def make_grid(rows, cols, box_width, box_height, spacing, directory):
+    image_lists = parse_directory(rows, cols, directory)
+    output_dir = "C:\\Users\\miralens\\Documents\\miralens\\frames"
+    if(not os.path.exists(output_dir)):
+        os.mkdir(output_dir)
+
+    for i in range(len(image_lists)):
+        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i], "%s\\frame_%02d" % (output_dir, i))
+        # print("\n")
+
 
 class Monitor:
     def __init__(self, height_px, width_px, height_in, width_in):
@@ -21,10 +83,25 @@ class Monitor:
         return int(math.floor(square_size*px_per_mm))
 
 
+monitor = Monitor(1080, 1920, 13.12, 23.43)
+image_size = monitor.mm_to_px(42)
+image_spacing = monitor.mm_to_px(3.175)
+rows = 4
+cols = 5
+window_width = (cols+1)*image_spacing+cols*image_size
+# extra row for fps display and sync sensor
+window_height = (rows+2)*image_spacing+(rows+1)*image_size
+make_grid(rows, cols, image_size, image_size, image_spacing, "C:\\Users\\miralens\\Documents\\miralens\\cube_slices")
+frames_dir = "C:\\Users\\miralens\\Documents\\miralens\\frames"
+imgs = []
+for file in os.listdir(frames_dir):
+    imgs.append(pyglet.image.load(frames_dir+"\\"+file))
+
 class SquareImage:
     def __init__(self, batch, x_pos, y_pos, image_size):
-        self.b = black.get_region(0, 0, image_size, image_size)
-        self.w = white.get_region(0, 0, image_size, image_size)
+        self.b = black
+        self.w = imgs
+        self.count = 0
         self.sprite = pyglet.sprite.Sprite(self.b, x=x_pos, y=y_pos, batch=batch)
 
     def black(self):
@@ -32,7 +109,8 @@ class SquareImage:
         return self
 
     def white(self):
-        self.sprite.image = self.w
+        self.sprite.image = self.w[self.count]
+        self.count = (self.count + 1) % len(imgs)
         return self
 
 
@@ -40,18 +118,10 @@ class Game(pyglet.window.Window):
     def __init__(self):
         clock.set_fps_limit(fps)
         self.fps_display = clock.ClockDisplay()
-        monitor = Monitor(1080, 1920, 13.12, 23.43)
-        image_size = monitor.mm_to_px(42)
-        image_spacing = monitor.mm_to_px(3.175)
-        rows = 4
-        cols = 5
-        window_width = (cols+1)*image_spacing+cols*image_size
-        # extra row for fps display and sync sensor
-        window_height = (rows+2)*image_spacing+(rows+1)*image_size
         pyglet.window.Window.__init__(self, width=window_width, height=window_height)
         self.batch_draw = pyglet.graphics.Batch()
-        x = 0
-        y = window_height - (image_size)
+        x = image_spacing
+        y = window_height - 4*(image_size+image_spacing)
         self.square = SquareImage(self.batch_draw, x, y, image_size)
         self.run = False
         self.schedule = pyglet.clock.schedule_interval(func=self.update, interval=1/float(fps*2))

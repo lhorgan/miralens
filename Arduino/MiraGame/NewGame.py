@@ -51,12 +51,13 @@ class Game(pyglet.window.Window):
         pyglet.window.Window.__init__(self, width=window_width, height=window_height)
         self.batch_draw = pyglet.graphics.Batch()
         squares = []
-        for i in range(rows+1):
+        for i in range(rows + 1):
             for j in range(cols):
-                x = window_width - (j+1)*(image_size + image_spacing)
-                y = window_height - (i+1)*(image_size + image_spacing)
+                x = image_spacing + (j) * (image_size + image_spacing)
+                y = window_height - (i + 1) * (image_size + image_spacing)
                 squares.append(SquareImage(self.batch_draw, x, y, image_size))
-        self.squares = squares[:-4]
+        self.squares = squares[0:20]
+        self.squares.append(squares[-1])
         self.run = False
         self.schedule = pyglet.clock.schedule_interval(func=self.update, interval=1/float(fps*2))
 

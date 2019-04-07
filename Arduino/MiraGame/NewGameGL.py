@@ -68,7 +68,7 @@ def make_grid(rows, cols, box_width, box_height, spacing, directory):
         make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i], "%s\\frame_%02d" % (output_dir, i))
         # print("\n")
 
-
+# josh's code
 class Monitor:
     def __init__(self, height_px, width_px, height_in, width_in):
         self.height_px = height_px

@@ -90,7 +90,7 @@ rows = 4
 cols = 5
 window_width = (cols+1)*image_spacing+cols*image_size
 # extra row for fps display and sync sensor
-window_height = (rows+2)*image_spacing+(rows+1)*image_size
+window_height = (rows+3)*image_spacing+(rows+2)*image_size
 make_grid(rows, cols, image_size, image_size, image_spacing, "C:\\Users\\miralens\\Documents\\miralens\\cube_slices")
 frames_dir = "C:\\Users\\miralens\\Documents\\miralens\\frames"
 imgs = []
@@ -121,7 +121,7 @@ class Game(pyglet.window.Window):
         pyglet.window.Window.__init__(self, width=window_width, height=window_height)
         self.batch_draw = pyglet.graphics.Batch()
         x = image_spacing
-        y = window_height - 4*(image_size+image_spacing)
+        y = window_height - 5*(image_size+image_spacing)
         self.square = SquareImage(self.batch_draw, x, y, image_size)
         self.run = False
         self.schedule = pyglet.clock.schedule_interval(func=self.update, interval=1/float(fps*2))

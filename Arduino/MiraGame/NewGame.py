@@ -53,11 +53,11 @@ class Game(pyglet.window.Window):
         squares = []
         for i in range(rows+1):
             for j in range(cols):
-                x = window_height - (j+1)*(image_size + image_spacing)
-                y = window_width - (i+1)*(image_size+image_spacing)
+                x = window_width - (j+1)*(image_size + image_spacing)
+                y = window_height - (i+1)*(image_size + image_spacing)
                 squares.append(SquareImage(self.batch_draw, x, y, image_size))
         self.squares = squares[:-4]
-        self.keys_held = []
+        self.run = False
         self.schedule = pyglet.clock.schedule_interval(func=self.update, interval=1/float(fps*2))
 
     def on_draw(self):
@@ -68,15 +68,11 @@ class Game(pyglet.window.Window):
             square.sprite.draw()
 
     def on_key_press(self, symbol, modifiers):
-        self.keys_held.append(symbol)
-        # print "The 'RIGHT' key was pressed"
-
-    def on_key_release(self, symbol, modifiers):
-        self.keys_held.pop(self.keys_held.index(symbol))
-        # print "The 'RIGHT' key was released"
+        if symbol == pyglet.window.key.SPACE:
+            self.run = not self.run
 
     def update(self, interval):
-        if pyglet.window.key.RIGHT in self.keys_held:
+        if self.run:
             global i
             if i % 2 == 0:
                 for square in self.squares:

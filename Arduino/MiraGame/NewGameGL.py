@@ -2,9 +2,11 @@ import pyglet
 import math
 from pyglet import clock
 i = 0
-fps = 240
+fps = 60
 black = pyglet.image.load("black.png")
 white = pyglet.image.load("white.png")
+
+from pyglet.gl import *
 
 import sys
 import os
@@ -13,7 +15,7 @@ import random
 
 
 # luke's code
-def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name):
+def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name, white=True):
     total_width = (box_width * cols) + ((cols - 1) * spacing)
     # extra row for dv sync
     total_height = (box_height * (rows+1)) + (rows * spacing)
@@ -38,7 +40,10 @@ def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, imag
             x_offset = 0
 
     # add white box for dv sync
-    img = Image.open("white.png")
+    if white:
+        img = Image.open("white.png")
+    else:
+        img = Image.open("black.png")
     img = img.resize((box_width, box_height), Image.ANTIALIAS)
     tup = (4*(box_width+spacing), 4*(box_height+spacing))
     canvas.paste(img, tup)
@@ -64,8 +69,10 @@ def make_grid(rows, cols, box_width, box_height, spacing, directory):
     if(not os.path.exists(output_dir)):
         os.mkdir(output_dir)
 
+    white = True
     for i in range(len(image_lists)):
-        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i], "%s\\frame_%02d" % (output_dir, i))
+        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i], "%s\\frame_%02d" % (output_dir, i), white)
+        white = not white
         # print("\n")
 
 # josh's code
@@ -91,7 +98,7 @@ cols = 5
 window_width = (cols+1)*image_spacing+cols*image_size
 # extra row for fps display and sync sensor
 window_height = (rows+3)*image_spacing+(rows+2)*image_size
-make_grid(rows, cols, image_size, image_size, image_spacing, "C:\\Users\\miralens\\Documents\\miralens\\cube_slices")
+make_grid(rows, cols, image_size, image_size, image_spacing, "C:\\Users\\miralens\\Documents\\miralens\\round1")
 frames_dir = "C:\\Users\\miralens\\Documents\\miralens\\frames"
 imgs = []
 for file in os.listdir(frames_dir):
@@ -118,7 +125,10 @@ class Game(pyglet.window.Window):
     def __init__(self):
         clock.set_fps_limit(fps)
         self.fps_display = clock.ClockDisplay()
-        pyglet.window.Window.__init__(self, width=window_width, height=window_height)
+
+        config = pyglet.gl.Config(double_buffer=True)
+
+        pyglet.window.Window.__init__(self, width=window_width, height=window_height, config=config)
         self.batch_draw = pyglet.graphics.Batch()
         x = image_spacing
         y = window_height - 5*(image_size+image_spacing)
@@ -129,7 +139,7 @@ class Game(pyglet.window.Window):
     def on_draw(self):
         self.clear()
         self.fps_display.draw()
-        self.batch_draw.draw()
+        #self.batch_draw.draw()
         self.square.sprite.draw()
 
     def on_key_press(self, symbol, modifiers):
@@ -138,14 +148,7 @@ class Game(pyglet.window.Window):
 
     def update(self, interval):
         if self.run:
-            global i
-            if i % 2 == 0:
-                self.square.black()
-                i = 0
-            else:
-                self.square.white()
-                i = 1
-            i += 1
+            self.square.white()
 
 
 if __name__ == "__main__":

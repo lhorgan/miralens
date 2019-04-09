@@ -1,9 +1,10 @@
-
+#pragma once
+#include "Arduino.h"
 #define GRID_SIZE 20
 
 class BackLight {
     private:
-        int led_pins[GRID_SIZE];
+        int *led_pins;
         int curr_high_pin;
 
     public:
@@ -11,5 +12,5 @@ class BackLight {
         void setup();
         void reset();
         void next_led();
-}
+};
 

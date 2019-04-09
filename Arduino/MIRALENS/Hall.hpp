@@ -14,6 +14,6 @@ class HallSensor {
     HallSensor(int pin_num=DEFAULT_HALL_PIN);
     virtual ~HallSensor() {};
     void setup();
-    void listenAndReportState();
+    int listenAndReportState();
     float frequencyUntilNow();
 };

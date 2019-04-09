@@ -1,16 +1,13 @@
 #include "Hall.hpp"
 
-HallSensor::HallSensor(int pin_num=DEFAULT_HALL_PIN) {
-  pin = pin_num;
-  prevState = LOW;
-};
+HallSensor::HallSensor(int pin_num=DEFAULT_HALL_PIN): pin{pin_num}, prevState{LOW} {};
 
 void HallSensor::setup() {
   pinMode(pin, INPUT);
 };
 
 int HallSensor::listenAndReportState() {
-  int curState = digitalRead(hallPin); // read from the sensor
+  int curState = digitalRead(pin); // read from the sensor
   // add to rotation count if a new rotation
   if(curState == LOW && prevState == HIGH) {
     float elapsed = millis();

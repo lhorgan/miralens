@@ -1,6 +1,4 @@
 #include <PID_v1.h>
-#define PIN_INPUT 0
-#define PIN_OUTPUT 3
 #include <HID.h>
 #include <Servo.h> //Use the Servo librarey for generating PWM
 Servo ESC; //name the servo object, here ESC

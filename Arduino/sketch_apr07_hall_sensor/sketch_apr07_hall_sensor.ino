@@ -8,7 +8,7 @@ void setup()
 
 void loop()
 {
-  hs.listen();
+  hs.listenAndReportState();
   int t = millis();
   if(t % 1000 == 0) {
       Serial.println("Hz (rots/sec):");

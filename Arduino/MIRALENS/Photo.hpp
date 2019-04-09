@@ -8,10 +8,6 @@
 #define DEFAULT_FRAME_ON_VAL 100
 #define DEFAULT_FRAME_OFF_VAL 0
 
-//Calculated and Global variables:
-const int FRAME_CUTTOFF_VAL = (FRAME_ON_VAL - FRAME_OFF_VAL) / 2;
-
-
 class PhotoTransistor {
   private:
     const int pin;

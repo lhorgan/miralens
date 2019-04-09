@@ -4,6 +4,7 @@
  * Header for controling the phototransistor(s) in MiraLens. 
  ***************************************************************************/
 #pragma once
+#include "Arduino.h"
 #define DEFAULT_PHOTO_PIN A3
 #define DEFAULT_FRAME_ON_VAL 100
 #define DEFAULT_FRAME_OFF_VAL 0
@@ -16,6 +17,6 @@ class PhotoTransistor {
   public:
     PhotoTransistor(int pin_num=DEFAULT_PHOTO_PIN, int frame_off_val=DEFAULT_FRAME_ON_VAL,
      int frame_on_val=DEFAULT_FRAME_OFF_VAL);
-    virtual ~PhotoTransistor() {};,
+    virtual ~PhotoTransistor() {};
     bool frameState();
 };

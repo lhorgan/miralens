@@ -15,7 +15,8 @@ void BackLight::setup() {
 void BackLight::reset() {
     if (curHighPin != -1) {
         digitalWrite(ledPins[curHighPin], LOW);
-        curHighPin = -1;
+        digitalWrite(ledPins[0], HIGH);
+        curHighPin = 0;
     }  
 }
 

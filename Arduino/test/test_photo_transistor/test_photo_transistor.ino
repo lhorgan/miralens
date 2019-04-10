@@ -1,3 +1,5 @@
+
+
 #include "Photo.hpp"
 const long BAUD = 115200; //Baud rate for serial communication
 PhotoTransistor pht = PhotoTransistor();
@@ -13,5 +15,6 @@ void loop() {
   unsigned long currentMicrosPT = micros();
   if(currentMicrosPT - prevMicrosPT >= INTERVAL_PT) {
     Serial.println(int(pht.frameState()));
+    Serial.println(pht.rawRead());
   }
 }

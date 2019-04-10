@@ -4,13 +4,13 @@
 
 class BackLight {
     private:
-        int *led_pins;
-        int curr_high_pin;
+        int *ledPins;
+        int curHighPin;
 
     public:
-        BackLight(int *led_pin_num);
+        BackLight(int *ledPinNum);
         void setup();
         void reset();
-        void next_led();
+        void nextLed();
 };
 

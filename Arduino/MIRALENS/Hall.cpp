@@ -20,7 +20,9 @@ int HallSensor::listenAndReportState() {
 };
 
 float HallSensor::frequencyUntilNow() {
-  float output = totalHz / totalRots;
+  float output = 0;
+  if (totalRots != 0)
+    float output = totalHz / totalRots;
   totalHz = 0;
   totalRots = 0;
   return output;

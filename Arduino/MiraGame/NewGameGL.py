@@ -2,7 +2,7 @@ import pyglet
 import math
 from pyglet import clock
 i = 0
-fps = 60
+fps = 240
 black = pyglet.image.load("black.png")
 white = pyglet.image.load("white.png")
 

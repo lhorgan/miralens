@@ -1,5 +1,5 @@
 const int circuitInput;
- int arr[20] = {13,12,11,10,9,8,7,6,5,4,3,2,40,41,42,43,44,50,51,52};
+ int arr[20] = {13,12,11,10,9,8,7,6,5,4,3,2,38,39,40,41,42,43,44,45};
 int val = 0;
 void setup() {
   // put your setup code here, to run once:
@@ -41,17 +41,18 @@ void setup() {
   digitalWrite(43, LOW); 
   pinMode(43, OUTPUT);
   digitalWrite(43, LOW); 
-  pinMode(50, OUTPUT);
-  digitalWrite(50, LOW); 
-  pinMode(51, OUTPUT);
-  digitalWrite(51, LOW); 
-  pinMode(52, OUTPUT);
-  digitalWrite(52, LOW); 
+  pinMode(45, OUTPUT);
+  digitalWrite(45, LOW); 
+  pinMode(38, OUTPUT);
+  digitalWrite(38, LOW); 
+  pinMode(39, OUTPUT);
+  digitalWrite(39, LOW); 
 
     Serial.begin(9600);
 
   }
 
+//open SERIAL, Enter either 43 or 44
 void loop() {
   if(Serial.available()) {
     val = Serial.parseInt();
@@ -59,9 +60,9 @@ void loop() {
   for (int i = 0; i < 20; i++){
     digitalWrite(arr[i], LOW);
   }
+  delay(1000);
   digitalWrite(val, HIGH);
   delay(1000);
-  //digitalWrite(13, LOW);
  /* digitalWrite(12, HIGH);
   delay(s);
   digitalWrite(12, LOW); 

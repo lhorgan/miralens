@@ -65,7 +65,7 @@ def parse_directory(rows, cols, directory):
 
 def make_grid(rows, cols, box_width, box_height, spacing, directory):
     image_lists = parse_directory(rows, cols, directory)
-    output_dir = "C:\\Users\\miralens\\Documents\\miralens\\frames"
+    output_dir = "C://Users//miralens//Documents//miralens//frames3"
     if(not os.path.exists(output_dir)):
         os.mkdir(output_dir)
 
@@ -98,8 +98,8 @@ cols = 5
 window_width = (cols+1)*image_spacing+cols*image_size
 # extra row for fps display and sync sensor
 window_height = (rows+3)*image_spacing+(rows+2)*image_size
-make_grid(rows, cols, image_size, image_size, image_spacing, "C:\\Users\\miralens\\Documents\\miralens\\round1")
-frames_dir = "C:\\Users\\miralens\\Documents\\miralens\\frames"
+make_grid(rows, cols, image_size, image_size, image_spacing, "C://Users//miralens//Documents//miralens//round2")
+frames_dir = "C://Users//miralens//Documents//miralens//frames3"
 imgs = []
 for file in os.listdir(frames_dir):
     imgs.append(pyglet.image.load(frames_dir+"\\"+file))

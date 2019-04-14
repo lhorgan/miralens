@@ -90,7 +90,7 @@ class Monitor:
         return int(math.floor(square_size*px_per_mm))
 
 
-monitor = Monitor(1080, 1920, 13.12, 23.43)
+monitor = Monitor(1130, 1930, 13.12, 23.43)
 image_size = monitor.mm_to_px(42)
 image_spacing = monitor.mm_to_px(3.175)
 rows = 4
@@ -98,7 +98,7 @@ cols = 5
 window_width = (cols+1)*image_spacing+cols*image_size
 # extra row for fps display and sync sensor
 window_height = (rows+3)*image_spacing+(rows+2)*image_size
-make_grid(rows, cols, image_size, image_size, image_spacing, "C://Users//miralens//Documents//miralens//round2")
+make_grid(rows, cols, image_size, image_size, image_spacing, "C://Users//miralens//Documents//miralens//leout")
 frames_dir = "C://Users//miralens//Documents//miralens//frames3"
 imgs = []
 for file in os.listdir(frames_dir):

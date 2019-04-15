@@ -13,6 +13,10 @@ import os
 from PIL import Image
 import random
 
+import serial
+
+import multiprocessing
+
 # TODO: Define directories here
 dir_out = "../frames8"
 dir_in = "../cs2"
@@ -53,7 +57,7 @@ def parse_directory(num_LEDs, directory):
     image_lists = [[]]
 
     for filename in os.listdir(directory):
-        image_lists[-1].append(directory + "\\" + filename)
+        image_lists[-1].append(directory + "/" + filename)
         if len(image_lists[-1]) == num_LEDs:
             image_lists.append([])
 
@@ -71,7 +75,7 @@ def make_grid(rows, cols, box_width, box_height, spacing, directory, which_LEDs)
     white = True
     for i in range(len(image_lists)):
         make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i],
-                         "%s\\frame_%02d" % (output_dir, i), which_LEDs, white)
+                         "%s/frame_%02d" % (output_dir, i), which_LEDs, white)
         white = not white
         # print("\n")
 
@@ -104,7 +108,7 @@ make_grid(rows, cols, image_size, image_size, image_spacing, dir_in, which_LEDs)
 frames_dir = dir_out
 imgs = []
 for file in os.listdir(frames_dir):
-    imgs.append(pyglet.image.load(frames_dir+"\\"+file))
+    imgs.append(pyglet.image.load(frames_dir+"/"+file))
 
 class SquareImage:
     def __init__(self, batch, x_pos, y_pos, image_size):
@@ -153,7 +157,47 @@ class Game(pyglet.window.Window):
             self.square.white()
 
 
+import time
+def worker(q):
+    while True:
+        #print('adding to queue')
+        q.put("hello world")
+        time.sleep(0.05)
+
+ANIMATE = True
+
+def read_queue(dt, qu):
+    while not qu.empty():
+        try:
+            item = qu.get(timeout=1)
+            print("GOT ITEM")
+        except:
+            #print("breaking")
+            break
+        if item == "stop":
+            ANIMTATE = False
+        elif item == "start":
+            ANIMATE = True
+
 if __name__ == "__main__":
+    q = multiprocessing.Queue()
+    p = multiprocessing.Process(target=worker, args=(q,))
+    p.start()
+
     window = Game()
     window.set_location((1920-window_width)//2, (1080-window_height)//2)
-    pyglet.app.run()
+    
+    pyglet.clock.schedule(read_queue, qu=q)
+
+    while True:
+        #if ANIMATE:
+        pyglet.clock.tick()
+
+        for window in pyglet.app.windows:
+            window.switch_to()
+            window.dispatch_events()
+            window.dispatch_event('on_draw')
+            window.flip()
+        # else:
+        #     print("paused")
+    #pyglet.app.run()

@@ -14,8 +14,8 @@ from PIL import Image
 import random
 
 # TODO: Define directories here
-dir_out = "C://Users//miralens//Documents//miralens//frames3"
-dir_in = "C://Users//miralens//Documents//miralens//leout"
+dir_out = "../frames3"
+dir_in = "../donut_double2"
 
 
 # luke's code

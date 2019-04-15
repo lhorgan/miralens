@@ -13,30 +13,31 @@ import os
 from PIL import Image
 import random
 
-# TODO: Define directories here
-dir_out = "../frames8"
-dir_in = "../cs2"
-
 
 # luke's code
-def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name, which_LEDs, white=True):
+def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name, white=True):
     total_width = (box_width * cols) + ((cols - 1) * spacing)
     # extra row for dv sync
     total_height = (box_height * (rows+1)) + (rows * spacing)
     canvas = Image.new('RGB', (total_width, total_height))
 
-    x_offset = spacing
-    y_offset = spacing
+    x_offset = 0
+    y_offset = 0
     images_placed_in_row = 0
-    for i, filename in enumerate(filenames):
-        col = which_LEDs[i]%cols
-        row = which_LEDs[i]//cols
+    for filename in filenames:
         # print("pasting %s" % filename)
         img = Image.open(filename)
         img = img.resize((box_width, box_height), Image.ANTIALIAS)
-        tup = (x_offset + col*(box_width+spacing), y_offset + row*(box_height+spacing))
+        tup = (x_offset, y_offset)
         # print(tup)
         canvas.paste(img, tup)
+        images_placed_in_row += 1
+
+        x_offset += box_width + spacing
+        if images_placed_in_row == cols:
+            images_placed_in_row = 0
+            y_offset += (box_height + spacing)
+            x_offset = 0
 
     # add white box for dv sync
     if white:
@@ -49,12 +50,12 @@ def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, imag
     canvas.save("%s.png" % image_name)
 
 
-def parse_directory(num_LEDs, directory):
+def parse_directory(rows, cols, directory):
     image_lists = [[]]
 
     for filename in os.listdir(directory):
         image_lists[-1].append(directory + "\\" + filename)
-        if len(image_lists[-1]) == num_LEDs:
+        if len(image_lists[-1]) == rows * cols:
             image_lists.append([])
 
     image_lists = image_lists[:-1]
@@ -62,16 +63,15 @@ def parse_directory(num_LEDs, directory):
     return image_lists
 
 
-def make_grid(rows, cols, box_width, box_height, spacing, directory, which_LEDs):
-    image_lists = parse_directory(len(which_LEDs), directory)
-    output_dir = dir_out
+def make_grid(rows, cols, box_width, box_height, spacing, directory):
+    image_lists = parse_directory(rows, cols, directory)
+    output_dir = "C://Users//miralens//Documents//miralens//frames5"
     if(not os.path.exists(output_dir)):
         os.mkdir(output_dir)
 
     white = True
     for i in range(len(image_lists)):
-        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i],
-                         "%s\\frame_%02d" % (output_dir, i), which_LEDs, white)
+        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i], "%s\\frame_%02d" % (output_dir, i), white)
         white = not white
         # print("\n")
 
@@ -90,18 +90,18 @@ class Monitor:
         return int(math.floor(square_size*px_per_mm))
 
 
-# TODO: Setup display parameters
+#monitor = Monitor(1130, 19
+# 30, 13.12, 23.43)\
 monitor = Monitor(1080, 1920, 13.12, 23.43)
 image_size = monitor.mm_to_px(42)
 image_spacing = monitor.mm_to_px(3.175)
 rows = 4
 cols = 5
-which_LEDs = [1,6,8,11,13]
 window_width = (cols+1)*image_spacing+cols*image_size
 # extra row for fps display and sync sensor
-window_height = (rows+1)*image_spacing+(rows)*image_size
-make_grid(rows, cols, image_size, image_size, image_spacing, dir_in, which_LEDs)
-frames_dir = dir_out
+window_height = (rows+3)*image_spacing+(rows+2)*image_size
+make_grid(rows, cols, image_size, image_size, image_spacing, "C://Users//miralens//Documents//miralens//calibration")
+frames_dir = "C://Users//miralens//Documents//miralens//frames5"
 imgs = []
 for file in os.listdir(frames_dir):
     imgs.append(pyglet.image.load(frames_dir+"\\"+file))
@@ -140,7 +140,7 @@ class Game(pyglet.window.Window):
 
     def on_draw(self):
         self.clear()
-        #self.fps_display.draw()
+        self.fps_display.draw()
         #self.batch_draw.draw()
         self.square.sprite.draw()
 
@@ -155,5 +155,4 @@ class Game(pyglet.window.Window):
 
 if __name__ == "__main__":
     window = Game()
-    window.set_location((1920-window_width)//2, (1080-window_height)//2)
     pyglet.app.run()

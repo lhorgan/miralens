@@ -19,29 +19,24 @@ dir_in = "../donut_double2"
 
 
 # luke's code
-def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name, white=True):
+def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, image_name, which_LEDs, white=True):
     total_width = (box_width * cols) + ((cols - 1) * spacing)
     # extra row for dv sync
     total_height = (box_height * (rows+1)) + (rows * spacing)
     canvas = Image.new('RGB', (total_width, total_height))
 
-    x_offset = 0
-    y_offset = 0
+    x_offset = spacing
+    y_offset = spacing
     images_placed_in_row = 0
-    for filename in filenames:
+    for i, filename in enumerate(filenames):
+        col = which_LEDs[i]%cols
+        row = which_LEDs[i]//cols
         # print("pasting %s" % filename)
         img = Image.open(filename)
         img = img.resize((box_width, box_height), Image.ANTIALIAS)
-        tup = (x_offset, y_offset)
+        tup = (x_offset + col*(box_width+spacing), y_offset + row*(box_height+spacing))
         # print(tup)
         canvas.paste(img, tup)
-        images_placed_in_row += 1
-
-        x_offset += box_width + spacing
-        if images_placed_in_row == cols:
-            images_placed_in_row = 0
-            y_offset += (box_height + spacing)
-            x_offset = 0
 
     # add white box for dv sync
     if white:
@@ -54,12 +49,12 @@ def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, imag
     canvas.save("%s.png" % image_name)
 
 
-def parse_directory(rows, cols, directory):
+def parse_directory(num_LEDs, directory):
     image_lists = [[]]
 
     for filename in os.listdir(directory):
         image_lists[-1].append(directory + "\\" + filename)
-        if len(image_lists[-1]) == rows * cols:
+        if len(image_lists[-1]) == num_LEDs:
             image_lists.append([])
 
     image_lists = image_lists[:-1]
@@ -67,15 +62,16 @@ def parse_directory(rows, cols, directory):
     return image_lists
 
 
-def make_grid(rows, cols, box_width, box_height, spacing, directory):
-    image_lists = parse_directory(rows, cols, directory)
+def make_grid(rows, cols, box_width, box_height, spacing, directory, which_LEDs):
+    image_lists = parse_directory(len(which_LEDs), directory)
     output_dir = dir_out
     if(not os.path.exists(output_dir)):
         os.mkdir(output_dir)
 
     white = True
     for i in range(len(image_lists)):
-        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i], "%s\\frame_%02d" % (output_dir, i), white)
+        make_grid_helper(rows, cols, box_width, box_height, spacing, image_lists[i],
+                         "%s\\frame_%02d" % (output_dir, i), which_LEDs, white)
         white = not white
         # print("\n")
 
@@ -94,15 +90,17 @@ class Monitor:
         return int(math.floor(square_size*px_per_mm))
 
 
-monitor = Monitor(1130, 1930, 13.12, 23.43)
+# TODO: Setup display parameters
+monitor = Monitor(1080, 1920, 13.12, 23.43)
 image_size = monitor.mm_to_px(42)
 image_spacing = monitor.mm_to_px(3.175)
 rows = 4
 cols = 5
+which_LEDs = [1,6,8,11,13]
 window_width = (cols+1)*image_spacing+cols*image_size
 # extra row for fps display and sync sensor
 window_height = (rows+3)*image_spacing+(rows+2)*image_size
-make_grid(rows, cols, image_size, image_size, image_spacing, dir_in)
+make_grid(rows, cols, image_size, image_size, image_spacing, dir_in, which_LEDs)
 frames_dir = dir_out
 imgs = []
 for file in os.listdir(frames_dir):

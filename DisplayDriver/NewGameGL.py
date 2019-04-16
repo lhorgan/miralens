@@ -44,7 +44,7 @@ def make_grid_helper(rows, cols, box_width, box_height, spacing, filenames, imag
     else:
         img = Image.open("black.png")
     img = img.resize((box_width, box_height), Image.ANTIALIAS)
-    tup = (4*(box_width+spacing), 4*(box_height+spacing))
+    tup = (4*(box_width+spacing) + spacing, 2*(box_height+spacing) + spacing)
     canvas.paste(img, tup)
     canvas.save("%s.png" % image_name)
 
@@ -155,5 +155,5 @@ class Game(pyglet.window.Window):
 
 if __name__ == "__main__":
     window = Game()
-    window.set_location((1920-window_width)//2, (1080-window_height)//2)
+    window.set_location((1920-window_width)//2-25, (1080-window_height)//2+110)
     pyglet.app.run()
